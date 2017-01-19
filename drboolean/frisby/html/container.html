@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.13.0/ramda.min.js"></script>
+	<script>
+		var _ = R	;
+	</script>
+</head>
+<body>
+	<script>
+		var Container = function(x){
+			this.__value = x	;
+			console.log(this)	;
+		}	;
+		Container.of = function(x){
+			return new Container(x)		;
+		}	;
+		Container.prototype.map = function(f){
+			return Container.of(f(this.__value))	;
+		}	;
+	</script>
+	<script>
+	</script>
+	<script>
+		Container.of(3)		;
+		Container.of("hotdogs")		;
+		Container.of(Container.of({
+			name : "yoda"	,
+		})
+		)		;
+		
+		Container.of(2).map(function(two){
+			return two + 2		;
+		})	;
+		Container.of("flowerthrowers").map(function(s){
+			return s.toUpperCase()		;
+		})	;
+		Container.of("bombs")
+			.map(_.prop("length"))
+		;
+		Container.of("bombs")
+			.map(_.concat(" away"))
+			.map(_.prop("length"))
+		;
+	</script>
+		
+	<script>
+	</script>
+	<script>
+	</script>
+</body>
+</html>

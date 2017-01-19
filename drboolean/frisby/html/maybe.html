@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset = "utf-8">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.13.0/ramda.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.2/lodash.min.js"></script>
+	<script>
+		var curry = _.curry	;
+		var _ = R	;
+	</script>
+</head>
+<body>
+	<script>
+		var add = function(x){
+			return function(y){
+				return x + y	;
+			}	;
+		}	;
+		var match = function(what){
+			return function(str){
+				return str.match(what)	;
+			}	;
+		}	;
+		var match = curry(function(what,str){
+				return str.match(what)	;
+		})	;
+	/*
+	*/
+	</script>
+	<script>
+		var Maybe = function(x){
+			this.__value = x	;
+			console.log(this)	;
+		}	;
+		Maybe.of = function(x){
+			return new Maybe(x)		;
+		}	;
+		Maybe.prototype.isNothing = function(){
+			return (
+						this.__value === null
+				||		this.__value === undefined
+			)	;
+		}	;
+		Maybe.prototype.map = function(f){
+			return this.isNothing() ?
+					Maybe.of(null)
+				:	Maybe.of(f(this.__value))
+			;
+		}	;
+	</script>
+	<script>
+		var x = "Malkhovich Malkhovich"	;
+		Maybe.of(x.match(/a/ig))	;
+		Maybe.of(match(/a/ig)(x))	;
+		
+		Maybe.of("Malkhovich Malkhovich").map(match(/a/ig))		;
+		Maybe.of(null).map(match(/a/ig))	;
+		Maybe.of({
+			name	: "Dinah"	,
+			age		: 14		,
+		}).map(_.prop("age")).map(add(10))	;
+	</script>
+	
+	<script>
+		var safeHead = function(xs){
+			return Maybe.of(xs[0])		;
+		}	;
+		var streetName = _.compose(
+			_.map(_.prop("street"))	,
+			safeHead				,
+			_.prop("addresses")
+		)	;
+	</script>
+	<script>
+		streetName({
+			addresses	: [{
+				street	: "Shady Ln."	,
+				number	: 4201			,
+			}]	,
+		})	;
+	</script>
+	<script>
+		var withdraw = curry(function(amount,account){
+			return account.balance !< amount ?
+				Maybe.of({
+					balance	: account.balance - amount	,
+				})
+			:	Maybe.of(null)
+			;
+		})	;
+	</script>
+	<script></script>
+</body>
+</html>

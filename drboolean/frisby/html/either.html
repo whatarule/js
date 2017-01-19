@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.13.0/ramda.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.2/lodash.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js"></script>
+	<script>
+		var curry = _.curry	;
+		var _ = R	;
+	</script>
+</head>
+<body>
+	<script></script>
+	<script>
+		var add = function(x){
+			return function(y){
+				return x + y	;
+			}	;
+		}	;
+	</script>
+	<script>
+		var Left = function(x){
+			this.__value = x	;
+			console.log(this)	;
+		}	;
+		Left.of = function(x){
+			return new Left(x)		;
+		}	;
+		Left.prototype.map = function(f){
+			return this		;
+		}
+		
+		var Right = function(x){
+			this.__value = x	;
+			console.log(this)	;
+		}	;
+		Right.of = function(x){
+			return new Right(x)		;
+		}	;
+		Right.prototype.map = function(f){
+			return Right.of(f(this.__value))	;
+		}	;
+	</script>
+	<script>
+		Right.of("rain").map(function(str){
+			return "b" + str	;
+		})	;
+		Left.of("rain").map(function(str){
+			return "b" + str	;
+		})	;
+		
+		Right.of({
+			host	: "localhost"	,
+			port	: 80			,
+		}).map(_.prop("host"))	;
+		Left.of("rolls eyes...").map(_.prop("host"))	;
+	</script>
+	
+	<script>
+		var getAge = curry(function(now,user){
+			var birthdate = moment(user.birthdate,"YYYY-MM-DD")	;
+			return !birthdate.isValid() ?
+				Left.of("Birthdate could not be persed.")
+			:	Right.of(now.diff(birthdate,"years"))
+			;
+		})	;
+		var fortune = _.compose(
+									_.concat("If you survive, you will be ")	,
+									add(1)
+		)	;
+		var zoltar = _.compose(
+									_.map(fortune)		,
+									getAge(moment())
+		)	;
+	</script>
+	<script>
+		getAge(moment(),{
+			birthdate	: "2005-12-12"	,
+		})	;
+		getAge(moment(),{
+			birthdate	: "2005-13-13"	,
+		})	;
+		
+		zoltar({
+			birthdate	: "2005-12-12"	,
+		})	;
+		zoltar({
+			birthdate	: "baloons!"	,
+		})	;
+	</script>
+	
+	<script>
+		var either = curry(function(f,g,e){
+			switch(e.constructor){
+				case Left	:
+					return f(e.__value)		;
+				case Right	:
+					return g(e.__value)		;
+			}
+		})	;
+		var id = function(x){
+			return x	;
+		}	;
+	</script>
+	<script>
+		var zoltar = _.compose(
+								either(id,fortune)		,
+								getAge(moment())
+		)	;
+	</script>
+	<script>
+		zoltar({
+			birthdate	: "2005-12-12"	,
+		})	;
+		zoltar({
+			birthdate	: "baloons!"	,
+		})	;
+	</script>
+	
+	<script></script>
+</body>
+</html>
+

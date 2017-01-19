@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.13.0/ramda.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.2/lodash.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js"></script>
+	<script>
+		var curry = _.curry	;
+		var _ = R	;
+	</script>
+</head>
+<body>
+	<script>
+		var map = curry(function(f,ary){
+			return ary.map(f)	;
+		})	;
+	</script>
+	<script>
+		var IO = function(f){
+			this.unsafePerformIO = f	;
+		}	;
+		IO.of = function(x){
+			return new IO(function(){
+				return x	;
+			})	;
+		}	;
+		IO.prototype.map = function(f){
+			return new IO(_.compose(f,this.unsafePerformIO))
+		}	;
+	</script>
+	<script>
+		var io_window = new IO(function(){
+			return window	;
+		})	;
+	</script>
+	<script>
+		io_window.map(function(win){
+			return win.innerWidth	;
+		})	;
+		io_window
+			.map(_.prop("localhost"))
+			.map(_.prop("href"))
+			.map(_.split("/"))
+		;
+	</script>
+	
+	<script>
+		var $ = function(selector){
+			return new IO(function(){
+				return document.querySelectorAll(selector)	;
+			})	;
+		}	;
+	</script>
+	<script>
+		$("#myDiv").map(_.head).map(function(div){
+			return div.innerHTML
+		})	;
+	</script>
+	
+	<script>
+		var Maybe = function(x){
+			this.__value = x	;
+			console.log(this)	;
+		}	;
+		Maybe.of = function(x){
+			return new Maybe(x)		;
+		}	;
+		Maybe.prototype.isNothing = function(){
+			return (
+						this.__value === null
+				||		this.__value === undefined
+			)	;
+		}	;
+		Maybe.prototype.map = function(f){
+			return this.isNothing() ?
+					Maybe.of(null)
+				:	Maybe.of(f(this.__value))
+			;
+		}	;
+	</script>
+	<script>
+		var url = new IO(function(){
+			return window.location.href		;
+		})	;
+		var toPairs = _.compose(_.map(_.split("/"),_.split("&")))	;
+		var params = _.compose(toPairs,_.last,_.split("?"))		;
+		var findParam = function(key){
+			return _.map(
+							_.compose(
+										Maybe.of	,
+										_.filter(_.compose(_.eq(key),_.head))	,
+										params
+							)	,
+							url
+			)	;
+		}	;
+	</script>
+	<script>
+		findParam("searchTerm").unsafePerformIO()	;
+	</script>
+	
+	<script>
+		var safeProp = curry(function(x,obj){
+			return new Maybe(obj[x])	;
+		})	;
+		var safeHead = safeProp(0)	;
+		
+		var firstAddressStreet = _.compose(
+				map(map(safeProp("street")))	,
+				map(safeHead)	,
+				safeProp("addresses")
+		)	;
+	</script>
+	<script>
+		firstAddressStreet({
+			addresses	: [
+			{
+				street		: {
+					name		: "Mulburry"	,
+					number		: 8402			,
+				}	,
+				postcode	: "WC2N"	,
+			}	,
+			]	,
+		})	;
+	</script>
+	
+	<script>
+		Maybe.prototype.join = function(){
+			return this.isNothing ?
+				Maybe.of(null)
+			:	this.__value
+			;
+		}	;
+		var join = function(mma){
+			return mma.join()	;
+		}	;
+	</script>
+	<script>
+		var firstAddressStreet = _.compose(
+				join			,
+				map(map(safeProp("street")))	,
+				join			,
+				map(safeHead)	,
+				safeProp("addresses")
+		)	;
+	</script>
+	<script>
+		firstAddressStreet({
+			addresses	: [
+			{
+				street		: {
+					name		: "Mulburry"	,
+					number		: 8402			,
+				}	,
+				postcode	: "WC2N"	,
+			}	,
+			]	,
+		})	;
+	</script>
+	
+	<script>
+		IO.prototype.join = function(){
+			var thiz = this		;
+			return new IO(function(){
+				return thiz.unsafePerformIO().unsafePerformIO()		;
+			})	;
+		}	;
+	</script>
+	
+	<script>
+		var chain = curry(function(f,m){
+			return m.map(f).join()		;
+		})	;
+	</script>
+	<script>
+		var firstAddressStreet = _.compose(
+			chain(safeProp("steet"))	,
+			chain(safeHead)				,
+			safeProp("addresses")
+		)	;
+	</script>
+	<script>
+		firstAddressStreet({
+			addresses	: [
+			{
+				street		: {
+					name		: "Mulburry"	,
+					number		: 8402			,
+				}	,
+				postcode	: "WC2N"	,
+			}	,
+			]	,
+		})	;
+	</script>
+	
+	<script></script>
+</body>
+</html>
